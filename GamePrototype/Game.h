@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseGame.h"
+#include <vector>
 class Game : public BaseGame
 {
 public:
@@ -13,6 +14,9 @@ public:
 
 	void Update( float elapsedSec ) override;
 	void Draw( ) const override;
+	void SpawnCultists();
+	void SpawnRituals();
+	void CultistMovement();
 
 	// Event handling
 	void ProcessKeyDownEvent( const SDL_KeyboardEvent& e ) override;
@@ -24,6 +28,13 @@ public:
 private:
 
 	// FUNCTIONS
+	std::vector<Point2f> m_Cultists;
+	Point2f m_Player{ 10.f,10.f };
+	std::vector<Point2f> m_Rituals;
+	const int RECTSIZE{ 30 };
+	const int CULTISTSAMOUNT{ 25 };
+	const int CULTISTSIZE{ 5 };
+	float m_elapsedsec{};
 	void Initialize();
 	void Cleanup( );
 	void ClearBackground( ) const;
