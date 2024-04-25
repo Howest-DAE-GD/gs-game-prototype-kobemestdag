@@ -90,34 +90,34 @@ void Game::CultistMovement()
 		{
 		}else if(rand1 == 1)
 		{
-			m_Cultists[i].center.x -= 10;
+			m_Cultists[i].center.x -= m_cultistspeed;
 		}
 		else if (rand1 == 2)
 		{
-			m_Cultists[i].center.x += 10;
+			m_Cultists[i].center.x += m_cultistspeed;
 		}
 
 		if (rand2 == 0) {}
 		else if (rand2 == 1)
 		{
-			m_Cultists[i].center.y -= 10;
+			m_Cultists[i].center.y -= m_cultistspeed;
 		}
-		else if (rand2 == 2)m_Cultists[i].center.y += 10;
+		else if (rand2 == 2)m_Cultists[i].center.y += m_cultistspeed;
 		if (m_Cultists[i].center.x <= 0)
 		{
-			m_Cultists[i].center.x += 10;
+			m_Cultists[i].center.x += m_cultistspeed;
 		}
 		if (m_Cultists[i].center.x >= GetViewPort().width)
 		{
-			m_Cultists[i].center.x -= 10;
+			m_Cultists[i].center.x -= m_cultistspeed;
 		}
 		if (m_Cultists[i].center.x <= 0)
 		{
-			m_Cultists[i].center.y += 10;
+			m_Cultists[i].center.y += m_cultistspeed;
 		}
 		if (m_Cultists[i].center.y >= GetViewPort().height)	
 		{
-			m_Cultists[i].center.y -= 10;
+			m_Cultists[i].center.y -= m_cultistspeed;
 		}
 	}
 }

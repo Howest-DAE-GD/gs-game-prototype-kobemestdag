@@ -37,6 +37,7 @@ private:
 	const int RECTSIZE{ 30 };
 	const int CULTISTSAMOUNT{ 70 };
 	const int CULTISTSIZE{ 10 };
+	int m_cultistspeed{ 10 };
 	float m_elapsedsec{};
 	void Initialize();
 	void Cleanup( );
