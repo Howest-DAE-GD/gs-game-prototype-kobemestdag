@@ -18,6 +18,7 @@ void Game::Initialize( )
 {
 	SpawnRituals();
 	SpawnCultists();
+	m_Player = new Player{ Point2f(134.f, 62.f), 1 , m_Rituals};
 }
 
 void Game::Cleanup( )
@@ -26,6 +27,9 @@ void Game::Cleanup( )
 
 void Game::Update( float elapsedSec )
 {
+	m_Player->GetCultists(m_Cultists);
+	m_Player->Update();
+	m_Rituals = m_Player->GetRituals();
 	m_elapsedsec += elapsedSec;
 	if(m_elapsedsec >= 0.05f)
 	{
@@ -50,28 +54,29 @@ void Game::Draw( ) const
 	ClearBackground();
 	for (int i{}; i < m_Rituals.size(); ++i)
 	{
-		utils::FillRect(Rectf{ m_Rituals[i].x,m_Rituals[i].y,float(RECTSIZE), float(RECTSIZE) });
+		utils::FillRect(Rectf{ m_Rituals[i]});
 	}
 	for (int i{}; i < m_Cultists.size(); ++i)
 	{
-		utils::FillArc(m_Cultists[i].x,m_Cultists[i].y,float(CULTISTSIZE), float(CULTISTSIZE),0.f,360.f );
-	}
-
-}
+		utils::FillArc(m_Cultists[i].center, m_Cultists[i].radius, m_Cultists[i].radius, 0.f, 360.f);
+	}	
+	m_Player->Draw();	
+		
+}	
 
 void Game::SpawnRituals()
 {
-	m_Rituals.push_back(Point2f{ 250.f,150.f });
-	m_Rituals.push_back(Point2f{ 1150.f, 200.f });
-	m_Rituals.push_back(Point2f{ 150.f, 680.f });
-	m_Rituals.push_back(Point2f{ 1150.f, 500.f });
+	m_Rituals.push_back(Rectf{ 250.f,150.f   , float(RECTSIZE), float(RECTSIZE)});
+	m_Rituals.push_back(Rectf{ 1150.f, 200.f , float(RECTSIZE), float(RECTSIZE)});
+	m_Rituals.push_back(Rectf{ 150.f, 680.f  , float(RECTSIZE), float(RECTSIZE)});
+	m_Rituals.push_back(Rectf{ 1150.f, 500.f , float(RECTSIZE), float(RECTSIZE)});
 
 }
 void Game::SpawnCultists()
 {
 	for(int i{}; i <= CULTISTSAMOUNT; ++i)
 	{
-		m_Cultists.push_back(Point2f{float( rand() % int((GetViewPort().width - 20))- 10),float(rand()% int((GetViewPort().height-20))-10) });
+		m_Cultists.push_back(Circlef(Point2f{float( rand() % int((GetViewPort().width - 20))- 10),float(rand()% int((GetViewPort().height-20))-10) }, float(CULTISTSIZE)));
 	}
 }
 
@@ -85,45 +90,52 @@ void Game::CultistMovement()
 		{
 		}else if(rand1 == 1)
 		{
-			m_Cultists[i].x -= 10;
+			m_Cultists[i].center.x -= 10;
 		}
 		else if (rand1 == 2)
 		{
-			m_Cultists[i].x += 10;
+			m_Cultists[i].center.x += 10;
 		}
 
 		if (rand2 == 0) {}
 		else if (rand2 == 1)
 		{
-			m_Cultists[i].y -= 10;
+			m_Cultists[i].center.y -= 10;
 		}
-		else if (rand2 == 2)m_Cultists[i].y += 10;
-		if (m_Cultists[i].x <= 0)
+		else if (rand2 == 2)m_Cultists[i].center.y += 10;
+		if (m_Cultists[i].center.x <= 0)
 		{
-			m_Cultists[i].x += 10;
+			m_Cultists[i].center.x += 10;
 		}
-		if (m_Cultists[i].x >= GetViewPort().width)
+		if (m_Cultists[i].center.x >= GetViewPort().width)
 		{
-			m_Cultists[i].x -= 10;
+			m_Cultists[i].center.x -= 10;
 		}
-		if (m_Cultists[i].y <= 0)
+		if (m_Cultists[i].center.x <= 0)
 		{
-			m_Cultists[i].y += 10;
+			m_Cultists[i].center.y += 10;
 		}
-		if (m_Cultists[i].y >= GetViewPort().height)
+		if (m_Cultists[i].center.y >= GetViewPort().height)	
 		{
-			m_Cultists[i].y -= 10;
+			m_Cultists[i].center.y -= 10;
 		}
 	}
 }
 
+void Game::GetRitualsLeft(std::vector<Rectf> rituals)
+{
+	m_Rituals = rituals;
+}
+
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 {
+	m_Player->Input(e);
 	//std::cout << "KEYDOWN event: " << e.keysym.sym << std::endl;
 }
 
 void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 {
+	m_Player->InputStop(e);
 	//std::cout << "KEYUP event: " << e.keysym.sym << std::endl;
 	//switch ( e.keysym.sym )
 	//{

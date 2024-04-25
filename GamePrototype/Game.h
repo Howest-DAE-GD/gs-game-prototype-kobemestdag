@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseGame.h"
 #include <vector>
+#include "Player.h"
 class Game : public BaseGame
 {
 public:
@@ -17,6 +18,7 @@ public:
 	void SpawnCultists();
 	void SpawnRituals();
 	void CultistMovement();
+	void GetRitualsLeft(std::vector<Rectf> rituals);
 
 	// Event handling
 	void ProcessKeyDownEvent( const SDL_KeyboardEvent& e ) override;
@@ -28,12 +30,13 @@ public:
 private:
 
 	// FUNCTIONS
-	std::vector<Point2f> m_Cultists;
-	Point2f m_Player{ 10.f,10.f };
-	std::vector<Point2f> m_Rituals;
+	Player* m_Player;
+
+	std::vector<Circlef> m_Cultists;
+	std::vector<Rectf> m_Rituals;
 	const int RECTSIZE{ 30 };
-	const int CULTISTSAMOUNT{ 25 };
-	const int CULTISTSIZE{ 5 };
+	const int CULTISTSAMOUNT{ 70 };
+	const int CULTISTSIZE{ 10 };
 	float m_elapsedsec{};
 	void Initialize();
 	void Cleanup( );
