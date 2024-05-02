@@ -28,7 +28,7 @@ void Game::Cleanup( )
 void Game::Update( float elapsedSec )
 {
 	m_Player->GetCultists(m_Cultists);
-	m_Player->Update();
+	m_Player->Update(elapsedSec);
 	m_Rituals = m_Player->GetRituals();
 	m_elapsedsec += elapsedSec;
 	if(m_elapsedsec >= 0.05f)
@@ -54,7 +54,9 @@ void Game::Draw( ) const
 	ClearBackground();
 	for (int i{}; i < m_Rituals.size(); ++i)
 	{
+		utils::SetColor(Color4f(0, 1, 0, 1));
 		utils::FillRect(Rectf{ m_Rituals[i]});
+		utils::SetColor(Color4f(1, 1, 1, 1));
 	}
 	for (int i{}; i < m_Cultists.size(); ++i)
 	{

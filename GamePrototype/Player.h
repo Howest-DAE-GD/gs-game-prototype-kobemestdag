@@ -12,9 +12,10 @@ public:
 
 	std::vector<Rectf> GetRituals();
 	void GetCultists(std::vector<Circlef> cultists);
-	void Ritual();
+	bool Ritual();
+	void FinishRitual();
 	void Draw();
-	void Update();
+	void Update(float elapsedSec);
 	void CheckHit();
 
 private:
@@ -27,8 +28,14 @@ private:
 	Point2f m_Position;
 	int m_Health{};
 	const int m_StandartHealth;
-	const float PLAYERSIZE{ 5.f };
+	const float PLAYERSIZE{ 10.f };
 	const int SPEED{ 3 };
+	const int LOADINGBARRADIUS{ 20 };
+	const int LOADINGBARWIDTH{ 5 };
+	const int WINDOWTOP{ 800 };
+	const int WINDOWRIGHT{ 1400 };
+	const float MAXELAPSED{ 2.f };
+	float m_ElapsedSec{};
 	bool m_IsMovingUp{ false };
 	bool m_IsMovingDown{ false };
 	bool m_IsMovingLeft{ false };

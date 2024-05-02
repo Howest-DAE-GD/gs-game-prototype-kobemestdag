@@ -33,9 +33,6 @@ void Player::Input(const SDL_KeyboardEvent e)
 	case SDL_SCANCODE_W:
 		m_IsMovingUp = true;
 		break;
-	case SDL_SCANCODE_R:
-		Ritual();
-		break;
 	case SDL_SCANCODE_X:
 		break;
 	case SDL_SCANCODE_SPACE:
@@ -44,8 +41,11 @@ void Player::Input(const SDL_KeyboardEvent e)
 	}
 }
 
-void Player::Update()
+void Player::Update(float elapsedSec)
 {
+	FinishRitual();
+	if (Ritual() == true)
+		m_ElapsedSec += elapsedSec;
 	std::cout << m_Health;
 	CheckHit();
 	if (m_IsMovingLeft == true || m_IsMovingRight == true || m_IsMovingUp == true || m_IsMovingDown == true)
@@ -59,17 +59,19 @@ void Player::Update()
 	}
 	if (m_IsMovingRight == true)
 	{
-		if (m_Position.x <= 2684 + SPEED)
+		if (m_Position.x <= WINDOWRIGHT - SPEED)
 		{
 			m_Position.x += SPEED;
 		}
 	}
 	if (m_IsMovingUp == true)
 	{
+		if(m_Position.y <= WINDOWTOP -SPEED)
 		m_Position.y += SPEED;
 	}
 	if (m_IsMovingDown == true)
 	{
+		if(m_Position.y >= SPEED)
 		m_Position.y -= SPEED;
 	}
 	if(m_Health == 0)
@@ -109,6 +111,7 @@ void Player::Draw()
 {
 	utils::SetColor(Color4f(1.f, 0.f, 0.f, 1.f));
 	utils::DrawPoint(m_Position, PLAYERSIZE);
+	utils::DrawArc(m_Position, LOADINGBARRADIUS, LOADINGBARRADIUS, 0, 6.2832 * (m_ElapsedSec / MAXELAPSED), LOADINGBARWIDTH);
 	utils::SetColor(Color4f(1.f, 1.f, 1.f, 1.f));
 }
 
@@ -118,14 +121,15 @@ std::vector<Rectf> Player::GetRituals()
 	return m_Rituals;
 }
 
-void Player::Ritual()
+bool Player::Ritual()
 {
 	for (int i{}; i < m_Rituals.size(); ++i)
 	{
 		if (utils::IsPointInRect(m_Position, m_Rituals[i]))
 		{
-			Rectf t{ m_Rituals[i] };
-			m_Rituals.erase(m_Rituals.begin() + i);
+			return true;
+			//Rectf t{ m_Rituals[i] };
+			//m_Rituals.erase(m_Rituals.begin() + i);
 		}
 	}
 }
@@ -142,7 +146,24 @@ void Player::CheckHit()
 		if (utils::IsPointInCircle(m_Position, m_Cultist[i]))
 		{
 			--m_Health;
+			m_ElapsedSec = 0;
 		}
 	}
 	
+}
+
+void Player::FinishRitual()
+{
+	for (int i{}; i < m_Rituals.size(); ++i)
+	{
+		if(utils::IsPointInRect(m_Position, m_Rituals[i]))
+		{
+			if (m_ElapsedSec >= MAXELAPSED)
+			{
+				Rectf t{ m_Rituals[i] };
+				m_Rituals.erase(m_Rituals.begin() + i);
+				m_ElapsedSec = 0;
+			}
+		}
+	}
 }
