@@ -27,6 +27,7 @@ void Game::Cleanup( )
 
 void Game::Update( float elapsedSec )
 {
+	m_Player->RecentlySabotaged(elapsedSec);
 	m_Player->GetCultists(m_Cultists);
 	m_Player->Update(elapsedSec);
 	m_Rituals = m_Player->GetRituals();
@@ -88,9 +89,10 @@ void Game::CultistMovement()
 	{
 		int rand1{ rand() % 3 };
 		int rand2{ rand() % 3 };
-		if(rand1 == 0)
+		if (rand1 == 0)
 		{
-		}else if(rand1 == 1)
+		}
+		else if (rand1 == 1)
 		{
 			m_Cultists[i].center.x -= m_cultistspeed;
 		}
@@ -117,10 +119,29 @@ void Game::CultistMovement()
 		{
 			m_Cultists[i].center.y += m_cultistspeed;
 		}
-		if (m_Cultists[i].center.y >= GetViewPort().height)	
+		if (m_Cultists[i].center.y >= GetViewPort().height)
 		{
 			m_Cultists[i].center.y -= m_cultistspeed;
 		}
+		if (!m_Player->m_Hidden)
+		{
+			if((abs(m_Player->m_Position.x - m_Cultists[i].center.x) + abs(m_Player->m_Position.y - m_Cultists[i].center.y)) <= 200)
+			{
+				if (m_Player->m_Position.x > m_Cultists[i].center.x) { m_Cultists[i].center.x += 3; }
+				else
+				{
+					m_Cultists[i].center.x -= 3;
+
+				}
+				if (m_Player->m_Position.y > m_Cultists[i].center.y) { m_Cultists[i].center.y += 3; }
+				else
+				{
+					m_Cultists[i].center.y -= 3;
+
+				}
+			}
+		}
+		
 	}
 }
 

@@ -17,7 +17,10 @@ public:
 	void Draw();
 	void Update(float elapsedSec);
 	void CheckHit();
+	void RecentlySabotaged(float e);
 
+	Point2f m_Position;
+	bool m_Hidden{ true };
 private:
 
 	std::vector<Rectf> m_Rituals;
@@ -25,7 +28,6 @@ private:
 	std::vector<Circlef> m_Cultist;
 
 	const Point2f m_StartPosition;
-	Point2f m_Position;
 	int m_Health{};
 	const int m_StandartHealth;
 	const float PLAYERSIZE{ 10.f };
@@ -41,5 +43,9 @@ private:
 	bool m_IsMovingLeft{ false };
 	bool m_IsMovingRight{ false };
 	bool m_IsMoving{ false };
+	int m_HiddenCooldown{ 10 };
+	bool m_Cooldown{ false };
+	bool m_FinishedSabotaging{ false };
+	float m_SabatageAgo{0.f};
 };
 

@@ -43,10 +43,10 @@ void Player::Input(const SDL_KeyboardEvent e)
 
 void Player::Update(float elapsedSec)
 {
+	std::cout << m_Hidden;
 	FinishRitual();
-	if (Ritual() == true)
+	if (Ritual() && !m_Hidden)
 		m_ElapsedSec += elapsedSec;
-	std::cout << m_Health;
 	CheckHit();
 	if (m_IsMovingLeft == true || m_IsMovingRight == true || m_IsMovingUp == true || m_IsMovingDown == true)
 		m_IsMoving = true;
@@ -74,7 +74,7 @@ void Player::Update(float elapsedSec)
 		if(m_Position.y >= SPEED)
 		m_Position.y -= SPEED;
 	}
-	if(m_Health == 0)
+	if(m_Health <= 0)
 	{
 		m_Position = m_StartPosition;
 		m_Rituals = m_StandartRituals;
@@ -101,6 +101,11 @@ void Player::InputStop(const SDL_KeyboardEvent e)
 	{
 		m_IsMovingDown = false;
 	}
+	else if (e.keysym.scancode == SDL_SCANCODE_R)
+	{
+		if(!m_Cooldown)
+			m_Hidden = !m_Hidden;
+	}
 
 
 
@@ -109,10 +114,18 @@ void Player::InputStop(const SDL_KeyboardEvent e)
 
 void Player::Draw()
 {
-	utils::SetColor(Color4f(1.f, 0.f, 0.f, 1.f));
-	utils::DrawPoint(m_Position, PLAYERSIZE);
-	utils::DrawArc(m_Position, LOADINGBARRADIUS, LOADINGBARRADIUS, 0, 6.2832 * (m_ElapsedSec / MAXELAPSED), LOADINGBARWIDTH);
-	utils::SetColor(Color4f(1.f, 1.f, 1.f, 1.f));
+	if(m_Hidden)
+	{
+		utils::FillArc(m_Position, 10, 10, 0, 7);
+	}
+	else 
+	{
+		utils::SetColor(Color4f(1.f, 0.f, 0.f, 1.f));
+		utils::DrawPoint(m_Position, PLAYERSIZE);
+		utils::DrawArc(m_Position, LOADINGBARRADIUS, LOADINGBARRADIUS, 0, 6.2832 * (m_ElapsedSec / MAXELAPSED), LOADINGBARWIDTH);
+		utils::SetColor(Color4f(1.f, 1.f, 1.f, 1.f));
+	}
+
 }
 
 std::vector<Rectf> Player::GetRituals()
@@ -122,7 +135,7 @@ std::vector<Rectf> Player::GetRituals()
 }
 
 bool Player::Ritual()
-{
+ {
 	for (int i{}; i < m_Rituals.size(); ++i)
 	{
 		if (utils::IsPointInRect(m_Position, m_Rituals[i]))
@@ -132,6 +145,7 @@ bool Player::Ritual()
 			//m_Rituals.erase(m_Rituals.begin() + i);
 		}
 	}
+	return false;
 }
 
 void Player::GetCultists( std::vector<Circlef> cultists)
@@ -141,29 +155,51 @@ void Player::GetCultists( std::vector<Circlef> cultists)
 
 void Player::CheckHit()
 {
-	for (int i{}; i < m_Cultist.size(); ++i)
+	if(!m_Hidden)
 	{
-		if (utils::IsPointInCircle(m_Position, m_Cultist[i]))
+		for (int i{}; i < m_Cultist.size(); ++i)
 		{
-			--m_Health;
-			m_ElapsedSec = 0;
-		}
-	}
-	
-}
-
-void Player::FinishRitual()
-{
-	for (int i{}; i < m_Rituals.size(); ++i)
-	{
-		if(utils::IsPointInRect(m_Position, m_Rituals[i]))
-		{
-			if (m_ElapsedSec >= MAXELAPSED)
+			if (utils::IsPointInCircle(m_Position, m_Cultist[i]))
 			{
-				Rectf t{ m_Rituals[i] };
-				m_Rituals.erase(m_Rituals.begin() + i);
+				--m_Health;
 				m_ElapsedSec = 0;
 			}
 		}
 	}
+}
+
+void Player::FinishRitual()
+{
+	if(!m_Hidden)
+	{
+		for (int i{}; i < m_Rituals.size(); ++i)
+		{
+			if (utils::IsPointInRect(m_Position, m_Rituals[i]))
+			{
+				if (m_ElapsedSec >= MAXELAPSED)
+				{
+					Rectf t{ m_Rituals[i] };
+					m_Rituals.erase(m_Rituals.begin() + i);
+					m_ElapsedSec = 0;
+					m_FinishedSabotaging = true;
+					m_Cooldown = true;
+				}
+			}
+		}
+	}
+
+}
+
+void Player::RecentlySabotaged( float e)
+{
+	if(m_FinishedSabotaging)
+	{
+		m_SabatageAgo += e;
+		if (m_SabatageAgo >= m_HiddenCooldown)
+		{
+			m_Cooldown = false;
+			m_SabatageAgo = 0;
+		}
+	}
+
 }
