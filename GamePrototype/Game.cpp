@@ -29,6 +29,7 @@ void Game::Cleanup( )
 
 void Game::Update( float elapsedSec )
 {
+	m_Bible2 = m_Player->GetBible();
 	if(running)
 	{
 		m_Player->RecentlySabotaged(elapsedSec);
@@ -41,9 +42,6 @@ void Game::Update( float elapsedSec )
 			m_elapsedsec -= 0.05f;
 			CultistMovement();
 		}
-	}
-	else { elapsedStart += elapsedSec;
-	if (elapsedStart >= 10.f) running = true;
 	}
 
 
@@ -62,31 +60,31 @@ void Game::Update( float elapsedSec )
 void Game::Draw( ) const
 {
 	ClearBackground();
-	if(running)
+	if (m_Rituals.empty())
 	{
-		for (int i{}; i < m_Rituals.size(); ++i)
-		{
-			utils::SetColor(Color4f(0, 1, 0, 1));
-			utils::FillRect(Rectf{ m_Rituals[i] });
-			utils::SetColor(Color4f(1, 1, 1, 1));
-		}
-		for (int i{}; i < m_Cultists.size(); ++i)
-		{
-			utils::FillArc(m_Cultists[i].center, m_Cultists[i].radius, m_Cultists[i].radius, 0.f, 360.f);
-		}
-		m_Player->Draw();
-	}
-	else
+		endScreen->Draw(Point2f(0, 0), Rectf(0, 0, startScreen->GetWidth(), startScreen->GetHeight()));
+	}else
 	{
-		if(m_Rituals.empty())
+		if (running)
 		{
-			endScreen->Draw(Point2f(0, 0), Rectf(0, 0, startScreen->GetWidth(), startScreen->GetHeight()));
+			for (int i{}; i < m_Rituals.size(); ++i)
+			{
+				utils::SetColor(Color4f(0, 1, 0, 1));
+				utils::FillRect(Rectf{ m_Rituals[i] });
+				utils::SetColor(Color4f(1, 1, 1, 1));
+			}
+			for (int i{}; i < m_Cultists.size(); ++i)
+			{
+				utils::FillArc(m_Cultists[i].center, m_Cultists[i].radius, m_Cultists[i].radius, 0.f, 360.f);
+			}
+			m_Player->Draw();
 		}
 		else
 		{
 			startScreen->Draw(Point2f(0, 0), Rectf(0, 0, startScreen->GetWidth(), startScreen->GetHeight()));
 		}
 	}
+
 
 
 }	
@@ -111,6 +109,26 @@ void Game::CultistMovement()
 {
 	for (int i{}; i < m_Cultists.size(); ++i)
 	{
+		for(int j{}; j < m_Player->GetBibleSize(); ++j)
+		{
+			if((abs(m_Player->m_Bible[j]->m_Pos.x - m_Cultists[i].center.x) + abs(m_Player->m_Bible[j]->m_Pos.y - m_Cultists[i].center.y)) <= 200)
+			{
+				if (m_Player->m_Bible[j]->m_Pos.x > m_Cultists[i].center.x) { m_Cultists[i].center.x += 10; }
+				else
+				{
+					m_Cultists[i].center.x -= 10;
+					break;
+
+				}
+				if (m_Player->m_Bible[j]->m_Pos.y > m_Cultists[i].center.y) { m_Cultists[i].center.y += 10; }
+				else
+				{
+					m_Cultists[i].center.y -= 10;
+					break;
+
+				}
+			}
+		}
 		int rand1{ rand() % 3 };
 		int rand2{ rand() % 3 };
 		if (rand1 == 0)
@@ -183,6 +201,7 @@ void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 {
 	m_Player->InputStop(e);
+	if (e.keysym.scancode == SDL_SCANCODE_T) running = true;
 	//std::cout << "KEYUP event: " << e.keysym.sym << std::endl;
 	//switch ( e.keysym.sym )
 	//{

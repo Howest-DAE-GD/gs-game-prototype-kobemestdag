@@ -29,7 +29,7 @@ public:
 	void ProcessMouseUpEvent( const SDL_MouseButtonEvent& e ) override;
 
 private:
-	
+	std::vector<Bible*> m_Bible2;
 	Texture* startScreen{};
 	Texture* endScreen{};
 	// FUNCTIONS
@@ -44,6 +44,7 @@ private:
 	float m_elapsedsec{};
 	float elapsedStart{};
 	bool running{ false };
+	bool skipStart{ false };
 	void Initialize();
 	void Cleanup( );
 	void ClearBackground( ) const;

@@ -43,6 +43,19 @@ void Player::Input(const SDL_KeyboardEvent e)
 
 void Player::Update(float elapsedSec)
 {
+	for(int i{}; i < m_Bible.size(); ++i)
+	{
+		m_Bible[i]->Update(elapsedSec);
+	}
+	if(m_TransformBlocked)
+	{
+		m_ElapsedBlocked += elapsedSec;
+		if(m_ElapsedBlocked >= 0.2)
+		{
+			m_ElapsedBlocked = 0;
+			m_TransformBlocked = false;
+		}
+	}
 	std::cout << m_Hidden;
 	FinishRitual();
 	if (Ritual() && !m_Hidden)
@@ -101,10 +114,22 @@ void Player::InputStop(const SDL_KeyboardEvent e)
 	{
 		m_IsMovingDown = false;
 	}
+	else if (e.keysym.scancode == SDL_SCANCODE_SPACE)
+	{
+		if(m_Bibles >= 0)
+		{
+			m_Bible.push_back(new Bible(m_Position));
+			--m_Bibles;
+		}
+	}
 	else if (e.keysym.scancode == SDL_SCANCODE_R)
 	{
 		if(!m_Cooldown)
 			m_Hidden = !m_Hidden;
+		else
+		{
+			m_TransformBlocked = true;
+		}
 	}
 
 
@@ -114,6 +139,12 @@ void Player::InputStop(const SDL_KeyboardEvent e)
 
 void Player::Draw()
 {
+	for(int i{}; i<= m_Bibles; ++i)
+	{
+		utils::SetColor(Color4f(0.f, 1.f, 1.f, 1.f));
+		utils::DrawRect(10 + i*4, 10 + i*8, 40, 40, 2);
+		utils::SetColor(Color4f(1.f, 1.f, 1.f, 1.f));
+	}
 	if(m_Hidden)
 	{
 		utils::SetColor(Color4f(0.f, 0.f, 1.f, 1.f));
@@ -122,10 +153,24 @@ void Player::Draw()
 	}
 	else 
 	{
-		utils::SetColor(Color4f(1.f, 0.f, 0.f, 1.f));
-		utils::DrawPoint(m_Position, PLAYERSIZE);
-		utils::DrawArc(m_Position, LOADINGBARRADIUS, LOADINGBARRADIUS, 0, 6.2832 * (m_ElapsedSec / MAXELAPSED), LOADINGBARWIDTH);
-		utils::SetColor(Color4f(1.f, 1.f, 1.f, 1.f));
+		if(m_TransformBlocked)
+		{
+			utils::SetColor(Color4f(1.f, 0.f, 0.f, 1.f));
+			utils::DrawPoint(m_Position, PLAYERSIZE + 5.f);
+			utils::DrawArc(m_Position, LOADINGBARRADIUS, LOADINGBARRADIUS, 0, 6.2832 * (m_ElapsedSec / MAXELAPSED), LOADINGBARWIDTH);
+			utils::SetColor(Color4f(1.f, 1.f, 1.f, 1.f));
+		}
+		else
+		{
+			utils::SetColor(Color4f(1.f, 1.f, 0.f, 1.f));
+			utils::DrawPoint(m_Position, PLAYERSIZE);
+			utils::DrawArc(m_Position, LOADINGBARRADIUS, LOADINGBARRADIUS, 0, 6.2832 * (m_ElapsedSec / MAXELAPSED), LOADINGBARWIDTH);
+			utils::SetColor(Color4f(1.f, 1.f, 1.f, 1.f));
+		}
+	}
+	for (int i{}; i < m_Bible.size(); ++i)
+	{
+		m_Bible[i]->Draw();
 	}
 
 }
@@ -167,6 +212,7 @@ void Player::CheckHit()
 				m_ElapsedSec = 0;
 				m_Cooldown = false;
 				m_Hidden = true;
+				m_Bibles = STARTBIBLES;
 			}
 		}
 	}
@@ -187,6 +233,7 @@ void Player::FinishRitual()
 					m_ElapsedSec = 0;
 					m_FinishedSabotaging = true;
 					m_Cooldown = true;
+					++m_Bibles;
 				}
 			}
 		}
@@ -206,4 +253,41 @@ void Player::RecentlySabotaged( float e)
 		}
 	}
 
+}
+
+std::vector<Bible*> Player::GetBible()
+{
+	return m_Bible;
+}
+
+int Player::GetBibleSize()
+{
+	return m_Bible.size();
+}
+
+Bible::Bible(Point2f pos)
+	:m_Pos{ pos }
+{
+
+}
+
+Bible::~Bible()
+{
+	m_Pos = Point2f(10000000, 10000000);
+}
+
+void Bible::Draw()
+{
+	utils::SetColor(Color4f(0.f, 1.f, 1.f, 1.f));
+	utils::FillRect(m_Pos, 30, 30);
+	utils::SetColor(Color4f(1.f, 1.f, 1.f, 1.f));
+}
+
+void Bible::Update(float e)
+{
+	m_elapsedSec += e;
+	if (m_elapsedSec >= timespan)
+	{
+		Bible::~Bible();
+	}
 }
