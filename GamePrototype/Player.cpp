@@ -116,7 +116,9 @@ void Player::Draw()
 {
 	if(m_Hidden)
 	{
+		utils::SetColor(Color4f(0.f, 0.f, 1.f, 1.f));
 		utils::FillArc(m_Position, 10, 10, 0, 7);
+		utils::SetColor(Color4f(1.f, 1.f, 1.f, 1.f));
 	}
 	else 
 	{
@@ -163,6 +165,8 @@ void Player::CheckHit()
 			{
 				--m_Health;
 				m_ElapsedSec = 0;
+				m_Cooldown = false;
+				m_Hidden = true;
 			}
 		}
 	}

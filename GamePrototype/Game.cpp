@@ -7,6 +7,8 @@ Game::Game( const Window& window )
 	:BaseGame{ window }
 {
 	Initialize();
+	startScreen = new Texture{ "StartScreen.png" };
+	endScreen = new Texture{ "EndScreen.png" };
 }
 
 Game::~Game( )
@@ -27,16 +29,23 @@ void Game::Cleanup( )
 
 void Game::Update( float elapsedSec )
 {
-	m_Player->RecentlySabotaged(elapsedSec);
-	m_Player->GetCultists(m_Cultists);
-	m_Player->Update(elapsedSec);
-	m_Rituals = m_Player->GetRituals();
-	m_elapsedsec += elapsedSec;
-	if(m_elapsedsec >= 0.05f)
+	if(running)
 	{
-		m_elapsedsec -= 0.05f;
-		CultistMovement();
+		m_Player->RecentlySabotaged(elapsedSec);
+		m_Player->GetCultists(m_Cultists);
+		m_Player->Update(elapsedSec);
+		m_Rituals = m_Player->GetRituals();
+		m_elapsedsec += elapsedSec;
+		if (m_elapsedsec >= 0.05f)
+		{
+			m_elapsedsec -= 0.05f;
+			CultistMovement();
+		}
 	}
+	else { elapsedStart += elapsedSec;
+	if (elapsedStart >= 10.f) running = true;
+	}
+
 
 	// Check keyboard state
 	//const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
@@ -53,18 +62,33 @@ void Game::Update( float elapsedSec )
 void Game::Draw( ) const
 {
 	ClearBackground();
-	for (int i{}; i < m_Rituals.size(); ++i)
+	if(running)
 	{
-		utils::SetColor(Color4f(0, 1, 0, 1));
-		utils::FillRect(Rectf{ m_Rituals[i]});
-		utils::SetColor(Color4f(1, 1, 1, 1));
+		for (int i{}; i < m_Rituals.size(); ++i)
+		{
+			utils::SetColor(Color4f(0, 1, 0, 1));
+			utils::FillRect(Rectf{ m_Rituals[i] });
+			utils::SetColor(Color4f(1, 1, 1, 1));
+		}
+		for (int i{}; i < m_Cultists.size(); ++i)
+		{
+			utils::FillArc(m_Cultists[i].center, m_Cultists[i].radius, m_Cultists[i].radius, 0.f, 360.f);
+		}
+		m_Player->Draw();
 	}
-	for (int i{}; i < m_Cultists.size(); ++i)
+	else
 	{
-		utils::FillArc(m_Cultists[i].center, m_Cultists[i].radius, m_Cultists[i].radius, 0.f, 360.f);
-	}	
-	m_Player->Draw();	
-		
+		if(m_Rituals.empty())
+		{
+			endScreen->Draw(Point2f(0, 0), Rectf(0, 0, startScreen->GetWidth(), startScreen->GetHeight()));
+		}
+		else
+		{
+			startScreen->Draw(Point2f(0, 0), Rectf(0, 0, startScreen->GetWidth(), startScreen->GetHeight()));
+		}
+	}
+
+
 }	
 
 void Game::SpawnRituals()

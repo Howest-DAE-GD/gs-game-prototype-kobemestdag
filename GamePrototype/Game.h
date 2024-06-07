@@ -2,6 +2,7 @@
 #include "BaseGame.h"
 #include <vector>
 #include "Player.h"
+#include <Texture.h>
 class Game : public BaseGame
 {
 public:
@@ -28,7 +29,9 @@ public:
 	void ProcessMouseUpEvent( const SDL_MouseButtonEvent& e ) override;
 
 private:
-
+	
+	Texture* startScreen{};
+	Texture* endScreen{};
 	// FUNCTIONS
 	Player* m_Player;
 
@@ -39,6 +42,8 @@ private:
 	const int CULTISTSIZE{ 10 };
 	int m_cultistspeed{ 10 };
 	float m_elapsedsec{};
+	float elapsedStart{};
+	bool running{ false };
 	void Initialize();
 	void Cleanup( );
 	void ClearBackground( ) const;
